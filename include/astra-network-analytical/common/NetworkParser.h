@@ -31,6 +31,8 @@ class NetworkParser {
      */
     [[nodiscard]] int get_dims_count() const noexcept;
 
+    [[nodiscard]] Latency get_reconfig_time() const noexcept;
+
     /**
      * Read "npus_count" value
      *
@@ -63,6 +65,9 @@ class NetworkParser {
   private:
     /// number of network dimensions
     int dims_count;
+
+    /// reconfiguration time per each dimension
+    Latency reconfig_time;
 
     /// NPUs count per each dimension
     std::vector<int> npus_count_per_dim;

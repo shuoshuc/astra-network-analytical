@@ -35,6 +35,12 @@ int NetworkParser::get_dims_count() const noexcept {
     return dims_count;
 }
 
+[[nodiscard]] Latency NetworkParser::get_reconfig_time() const noexcept {
+    assert(dims_count > 0);
+
+    return reconfig_time;
+}
+
 std::vector<int> NetworkParser::get_npus_counts_per_dim() const noexcept {
     assert(dims_count > 0);
     assert(npus_count_per_dim.size() == dims_count);
@@ -96,6 +102,10 @@ TopologyBuildingBlock NetworkParser::parse_topology_name(const std::string& topo
 
     if (topology_name == "Switch") {
         return TopologyBuildingBlock::Switch;
+    }
+
+    if (topology_name == "Reconfig") {
+        return TopologyBuildingBlock::Reconfig;
     }
 
     // shouldn't reach here
