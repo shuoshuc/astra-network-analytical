@@ -40,6 +40,8 @@ TopologyManager::TopologyManager(int npus_count, int devices_count, EventQueue* 
     latencies.resize(devices_count, std::vector<Latency>(devices_count, Latency(0)));
 
     topology_iteration = 0;
+
+    inflight_coll = 0;
 }
 
 std::shared_ptr<Device> TopologyManager::get_device(const DeviceId deviceId) noexcept {
@@ -102,18 +104,19 @@ void TopologyManager::increment_callback() noexcept {
 void TopologyManager::reconfigure(std::vector<std::vector<Bandwidth>> bandwidths,
                                std::vector<std::vector<Latency>> latencies, Latency reconfig_time, int topo_id) noexcept {
 
-    if (topo_id == cur_topo_id) {
-        std::cout << "Already in the requested topology and reconfiguring, ignoring reconfiguration request to topo_id " << topo_id << std::endl;
-        return;
-    }
 
-    while (is_reconfiguring() || !event_queue->finished()) {
+    while ((is_reconfiguring() || inflight_coll > 0) && !event_queue->finished()) {
         // TODO check condition
-        std::cout << "Reconfig: trying, but still reconfiguring or not events not drained" << std::endl;
+        std::cout << "\nTM: trying to reconfig, inflight coll: " << inflight_coll << ", is reconfiguring? " << is_reconfiguring() << ", is event queue finished? " << event_queue->finished() << std::endl;
         event_queue->proceed();
     }
 
-    printf("\n!!! Reconfig to topo_id: %d, Devices count: %d, NPUs count: %d\n", topo_id, devices_count, npus_count);
+    if (topo_id == cur_topo_id) {
+        std::cout << "TM: Already in the requested topology and reconfiguring, ignoring reconfiguration request to topo_id " << topo_id << std::endl;
+        return;
+    }
+
+    printf("\nTM: !!! Reconfig to topo_id: %d, Devices count: %d, NPUs count: %d, inflight_coll %d\n", topo_id, devices_count, npus_count, inflight_coll);
     printf("bandwidths size: %zu, latencies size: %zu\n\n", bandwidths.size(), latencies.size());
 
     assert(bandwidths.size() == devices_count);
@@ -132,16 +135,15 @@ void TopologyManager::reconfigure(std::vector<std::vector<Bandwidth>> bandwidths
     this->latencies = std::move(latencies);
     this->reconfig_time = reconfig_time;
 
-
-
     precomputeRoutes();
 
-    printf("Reconfiguring topology with %d devices and %d NPUs and reconfig time %f.\n", devices_count, npus_count, reconfig_time);
+    // printf("TM: Reconfiguring topology with %d devices and %d NPUs and reconfig time %f.\n", devices_count, npus_count, reconfig_time);
 
     reconfiguring = true;
     this->cur_topo_id = topo_id;
     topology_iteration++;
     drain_network();
+    return;
 }
 
 void TopologyManager::reconfigure(int topo_id) noexcept{
@@ -219,9 +221,6 @@ void TopologyManager::precomputeRoutes() noexcept {
 void TopologyManager::send(std::unique_ptr<Chunk> chunk) noexcept {
     assert(chunk != nullptr);
     assert(chunk->current_device() != nullptr);
-
-    printf("Sending chunk from %d to %d\n", chunk->current_device()->get_id(), chunk->next_device()->get_id());
-
     // chunk->update_route(route(chunk->current_device()->get_id(), chunk->next_device()->get_id()), topology_iteration);
 
     // Get the source device ID
@@ -231,6 +230,9 @@ void TopologyManager::send(std::unique_ptr<Chunk> chunk) noexcept {
     if(chunk->get_topology_iteration() == -1){
         chunk->update_route(route(src, chunk->next_device()->get_id()), topology_iteration);
     }
+
+    printf("Sending chunk from %d to %d, in topo iter %d\n", chunk->current_device()->get_id(), chunk->next_device()->get_id(), chunk->get_topology_iteration());
+
     // Send the chunk through the topology
     topology->send(std::move(chunk));
 }
