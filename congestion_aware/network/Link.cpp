@@ -8,6 +8,7 @@ LICENSE file in the root directory of this source tree.
 #include "congestion_aware/Chunk.h"
 #include "congestion_aware/Device.h"
 #include <cassert>
+#include <iostream>
 
 using namespace NetworkAnalytical;
 using namespace NetworkAnalyticalCongestionAware;
@@ -129,6 +130,8 @@ void Link::schedule_chunk_transmission(std::unique_ptr<Chunk> chunk) noexcept {
     // set link busy
     set_busy();
 
+    const auto chunk_size = chunk->get_size();
+    const auto current_time = Link::event_queue->get_current_time();
     auto src_dev = chunk->current_device();
     auto next_dev = chunk->next_device();
     std::cout << "[Link] Scheduling chunk transmission: "
