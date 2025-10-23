@@ -15,6 +15,18 @@ using namespace NetworkAnalyticalCongestionAware;
 // declaring static event_queue
 std::shared_ptr<EventQueue> Link::event_queue;
 
+inline void print_route(const NetworkAnalyticalCongestionAware::Route& route) {
+    std::cout << "[Route] ";
+    bool first = true;
+    for (const auto& dev : route) {
+        if (!first) std::cout << " -> ";
+        first = false;
+        std::cout << (dev ? dev->get_id() : -1);
+    }
+    std::cout << std::endl;
+}
+
+
 void Link::link_become_free(void* const link_ptr) noexcept {
     assert(link_ptr != nullptr);
 
@@ -116,6 +128,18 @@ void Link::schedule_chunk_transmission(std::unique_ptr<Chunk> chunk) noexcept {
 
     // set link busy
     set_busy();
+
+    auto src_dev = chunk->current_device();
+    auto next_dev = chunk->next_device();
+    std::cout << "[Link] Scheduling chunk transmission: "
+        << "ChunkPtr=" << chunk.get()
+        << ", ChunkSize=" << chunk_size
+        << ", From Device=" << (src_dev ? src_dev->get_id() : -1)
+        << ", To Device=" << (next_dev ? next_dev->get_id() : -1)
+        << ", Time=" << current_time
+        << std::endl;
+    print_route(chunk->get_route());
+
 
     // get metadata
     const auto chunk_size = chunk->get_size();
