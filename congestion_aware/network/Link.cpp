@@ -13,9 +13,7 @@ LICENSE file in the root directory of this source tree.
 using namespace NetworkAnalytical;
 using namespace NetworkAnalyticalCongestionAware;
 
-// declaring static event_queue
-std::shared_ptr<EventQueue> Link::event_queue;
-
+// MT: 
 inline void print_route(const NetworkAnalyticalCongestionAware::Route& route) {
     std::cout << "[Route] ";
     bool first = true;
@@ -28,11 +26,19 @@ inline void print_route(const NetworkAnalyticalCongestionAware::Route& route) {
 }
 
 
+// declaring static event_queue
+std::shared_ptr<EventQueue> Link::event_queue;
+
 void Link::link_become_free(void* const link_ptr) noexcept {
     assert(link_ptr != nullptr);
 
     // cast to Link*
     auto* const link = static_cast<Link*>(link_ptr);
+
+    // MT: debug print
+    std::cout << "[Link] Link becomes free at time " 
+              << Link::event_queue->get_current_time()
+              << std::endl;
 
     // set link free
     link->set_free();
@@ -130,23 +136,22 @@ void Link::schedule_chunk_transmission(std::unique_ptr<Chunk> chunk) noexcept {
     // set link busy
     set_busy();
 
-    const auto chunk_size = chunk->get_size();
-    const auto current_time = Link::event_queue->get_current_time();
-    auto src_dev = chunk->current_device();
-    auto next_dev = chunk->next_device();
-    std::cout << "[Link] Scheduling chunk transmission: "
-        << "ChunkPtr=" << chunk.get()
-        << ", ChunkSize=" << chunk_size
-        << ", From Device=" << (src_dev ? src_dev->get_id() : -1)
-        << ", To Device=" << (next_dev ? next_dev->get_id() : -1)
-        << ", Time=" << current_time
-        << std::endl;
-    print_route(chunk->get_route());
-
-
     // get metadata
     const auto chunk_size = chunk->get_size();
     const auto current_time = Link::event_queue->get_current_time();
+
+    // MT: debug print
+    auto src_dev = chunk->current_device();
+    auto next_dev = chunk->next_device();
+    std::cout << "[Link] Scheduling chunk transmission: "
+              << "ChunkPtr=" << chunk.get()
+              << ", ChunkSize=" << chunk_size
+              << ", From Device=" << (src_dev ? src_dev->get_id() : -1)
+              << ", To Device=" << (next_dev ? next_dev->get_id() : -1)
+              << ", Time=" << current_time
+              << std::endl;
+    print_route(chunk->get_route());
+
 
     // schedule chunk arrival event
     const auto communication_time = communication_delay(chunk_size);
