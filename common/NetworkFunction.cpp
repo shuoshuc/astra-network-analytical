@@ -19,7 +19,7 @@ Bandwidth NetworkAnalytical::bw_GBps_to_Bpns(const Bandwidth bw_GBps) noexcept {
 }
 
 
-void NetworkAnalytical::debug_log(const std::string& msg) {
+void NetworkAnalytical::debug_log(const std::string& msg) noexcept {
     if constexpr (DEBUG_PRINT) {
         std::cout << msg << std::endl;
     }
