@@ -73,6 +73,9 @@ class Chunk {
      */
     [[nodiscard]] ChunkSize get_size() const noexcept;
 
+    // MT:
+    [[nodiscard]] const Route& get_route() const noexcept { return route; }
+
     /**
      * Invoke the registered callback
      * i.e., this method should be called when the chunk arrives its destination.

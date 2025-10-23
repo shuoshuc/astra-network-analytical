@@ -19,4 +19,9 @@ namespace NetworkAnalytical {
  */
 Bandwidth bw_GBps_to_Bpns(Bandwidth bw_GBps) noexcept;
 
+/**
+ * Debug logger.
+ */
+void debug_log(const std::string& msg) noexcept;
+
 }  // namespace NetworkAnalytical
