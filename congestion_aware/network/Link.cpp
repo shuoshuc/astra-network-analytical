@@ -32,44 +32,14 @@ inline std::string route_to_string(const NetworkAnalyticalCongestionAware::Route
 }
 
 
-// declaring static event_queue
-std::shared_ptr<EventQueue> Link::event_queue;
-
-inline std::string route_to_string(const NetworkAnalyticalCongestionAware::Route& route) {
-    std::ostringstream oss;
-    oss << "[Link] Route: ";
-    bool first = true;
-    for (const auto& dev : route) {
-        if (!first) {
-            oss << " -> ";
-        }
-        first = false;
-        oss << (dev ? dev->get_id() : -1);
-    }
-    return oss.str();
-}
-
-
 void Link::link_become_free(void* const link_ptr) noexcept {
     assert(link_ptr != nullptr);
 
     // cast to Link*
     auto* const link = static_cast<Link*>(link_ptr);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     debug_log("[Link] Link becomes free at time " +
               std::to_string(Link::event_queue->get_current_time()));
-=======
-    // MT: debug print
-    std::cout << "[Link] Link becomes free at time " 
-              << Link::event_queue->get_current_time()
-              << std::endl;
->>>>>>> 8c85cdc (add more print)
-=======
-    debug_log("[Link] Link becomes free at time " +
-              std::to_string(Link::event_queue->get_current_time()));
->>>>>>> 2b69128 (clean up logging and remove unidirectional)
 
     // set link free
     link->set_free();
@@ -171,8 +141,6 @@ void Link::schedule_chunk_transmission(std::unique_ptr<Chunk> chunk) noexcept {
     const auto chunk_size = chunk->get_size();
     const auto current_time = Link::event_queue->get_current_time();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     auto src_dev = chunk->current_device();
     auto next_dev = chunk->next_device();
 
@@ -185,26 +153,6 @@ void Link::schedule_chunk_transmission(std::unique_ptr<Chunk> chunk) noexcept {
         << ", Time=" << current_time;
     debug_log(oss.str());
     debug_log(route_to_string(chunk->get_route()));
-=======
-    // MT: debug print
-=======
->>>>>>> 2b69128 (clean up logging and remove unidirectional)
-    auto src_dev = chunk->current_device();
-    auto next_dev = chunk->next_device();
-
-<<<<<<< HEAD
->>>>>>> 8c85cdc (add more print)
-=======
-    std::ostringstream oss;
-    oss << "[Link] Scheduling chunk transmission: "
-        << "ChunkPtr=" << chunk.get()
-        << ", ChunkSize=" << chunk_size
-        << ", From Device=" << (src_dev ? src_dev->get_id() : -1)
-        << ", To Device=" << (next_dev ? next_dev->get_id() : -1)
-        << ", Time=" << current_time;
-    debug_log(oss.str());
-    debug_log(route_to_string(chunk->get_route()));
->>>>>>> 2b69128 (clean up logging and remove unidirectional)
 
     // schedule chunk arrival event
     const auto communication_time = communication_delay(chunk_size);
