@@ -5,6 +5,7 @@ LICENSE file in the root directory of this source tree.
 
 #include "common/NetworkFunction.h"
 #include <cassert>
+#include <iostream>
 
 using namespace NetworkAnalytical;
 
