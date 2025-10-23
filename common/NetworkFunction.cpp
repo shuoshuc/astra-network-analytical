@@ -15,3 +15,10 @@ Bandwidth NetworkAnalytical::bw_GBps_to_Bpns(const Bandwidth bw_GBps) noexcept {
     // 1 s is 10^9 ns
     return bw_GBps * (1 << 30) / (1'000'000'000);  // GB/s to B/ns
 }
+
+
+void debug_log(const std::string& msg) {
+    if constexpr (DEBUG_PRINT) {
+        std::cout << msg << std::endl;
+    }
+}
