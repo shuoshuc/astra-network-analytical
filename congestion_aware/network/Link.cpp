@@ -5,6 +5,7 @@ LICENSE file in the root directory of this source tree.
 
 #include "congestion_aware/Link.h"
 #include "common/NetworkFunction.h"
+#include "common/Flags.h"
 #include "congestion_aware/Chunk.h"
 #include "congestion_aware/Device.h"
 #include <cassert>
@@ -13,21 +14,23 @@ LICENSE file in the root directory of this source tree.
 using namespace NetworkAnalytical;
 using namespace NetworkAnalyticalCongestionAware;
 
-// MT: 
-inline void print_route(const NetworkAnalyticalCongestionAware::Route& route) {
-    std::cout << "[Route] ";
-    bool first = true;
-    for (const auto& dev : route) {
-        if (!first) std::cout << " -> ";
-        first = false;
-        std::cout << (dev ? dev->get_id() : -1);
-    }
-    std::cout << std::endl;
-}
-
-
 // declaring static event_queue
 std::shared_ptr<EventQueue> Link::event_queue;
+
+inline std::string route_to_string(const NetworkAnalyticalCongestionAware::Route& route) {
+    std::ostringstream oss;
+    oss << "[Link] Route: ";
+    bool first = true;
+    for (const auto& dev : route) {
+        if (!first) {
+            oss << " -> ";
+        }
+        first = false;
+        oss << (dev ? dev->get_id() : -1);
+    }
+    return oss.str();
+}
+
 
 void Link::link_become_free(void* const link_ptr) noexcept {
     assert(link_ptr != nullptr);
@@ -35,10 +38,8 @@ void Link::link_become_free(void* const link_ptr) noexcept {
     // cast to Link*
     auto* const link = static_cast<Link*>(link_ptr);
 
-    // MT: debug print
-    std::cout << "[Link] Link becomes free at time " 
-              << Link::event_queue->get_current_time()
-              << std::endl;
+    debug_log("[Link] Link becomes free at time " +
+              std::to_string(Link::event_queue->get_current_time()));
 
     // set link free
     link->set_free();
@@ -140,18 +141,18 @@ void Link::schedule_chunk_transmission(std::unique_ptr<Chunk> chunk) noexcept {
     const auto chunk_size = chunk->get_size();
     const auto current_time = Link::event_queue->get_current_time();
 
-    // MT: debug print
     auto src_dev = chunk->current_device();
     auto next_dev = chunk->next_device();
-    std::cout << "[Link] Scheduling chunk transmission: "
-              << "ChunkPtr=" << chunk.get()
-              << ", ChunkSize=" << chunk_size
-              << ", From Device=" << (src_dev ? src_dev->get_id() : -1)
-              << ", To Device=" << (next_dev ? next_dev->get_id() : -1)
-              << ", Time=" << current_time
-              << std::endl;
-    print_route(chunk->get_route());
 
+    std::ostringstream oss;
+    oss << "[Link] Scheduling chunk transmission: "
+        << "ChunkPtr=" << chunk.get()
+        << ", ChunkSize=" << chunk_size
+        << ", From Device=" << (src_dev ? src_dev->get_id() : -1)
+        << ", To Device=" << (next_dev ? next_dev->get_id() : -1)
+        << ", Time=" << current_time;
+    debug_log(oss.str());
+    debug_log(route_to_string(chunk->get_route()));
 
     // schedule chunk arrival event
     const auto communication_time = communication_delay(chunk_size);
