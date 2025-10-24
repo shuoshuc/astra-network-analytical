@@ -6,6 +6,7 @@ LICENSE file in the root directory of this source tree.
 #pragma once
 
 #include "common/Type.h"
+#include <string>
 
 namespace NetworkAnalytical {
 

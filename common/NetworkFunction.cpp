@@ -4,7 +4,9 @@ LICENSE file in the root directory of this source tree.
 *******************************************************************************/
 
 #include "common/NetworkFunction.h"
+#include "common/Flags.h"
 #include <cassert>
+#include <iostream>
 
 using namespace NetworkAnalytical;
 
@@ -17,7 +19,7 @@ Bandwidth NetworkAnalytical::bw_GBps_to_Bpns(const Bandwidth bw_GBps) noexcept {
 }
 
 
-void debug_log(const std::string& msg) {
+void NetworkAnalytical::debug_log(const std::string& msg) noexcept {
     if constexpr (DEBUG_PRINT) {
         std::cout << msg << std::endl;
     }
