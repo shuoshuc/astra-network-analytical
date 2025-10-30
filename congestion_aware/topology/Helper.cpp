@@ -7,6 +7,7 @@ LICENSE file in the root directory of this source tree.
 #include "congestion_aware/FullyConnected.h"
 #include "congestion_aware/Ring.h"
 #include "congestion_aware/Switch.h"
+#include "common/Flags.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -36,7 +37,7 @@ std::shared_ptr<Topology> NetworkAnalyticalCongestionAware::construct_topology(
 
     switch (topology_type) {
     case TopologyBuildingBlock::Ring:
-        return std::make_shared<Ring>(npus_count, bandwidth, latency, bidirectional=false);
+        return std::make_shared<Ring>(npus_count, bandwidth, latency, bidirectional=RING_BIDIRECTIONAL);
     case TopologyBuildingBlock::Switch:
         return std::make_shared<Switch>(npus_count, bandwidth, latency);
     case TopologyBuildingBlock::FullyConnected:

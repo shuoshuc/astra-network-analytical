@@ -9,6 +9,7 @@ LICENSE file in the root directory of this source tree.
 #include "congestion_unaware/MultiDimTopology.h"
 #include "congestion_unaware/Ring.h"
 #include "congestion_unaware/Switch.h"
+#include "common/Flags.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -35,7 +36,7 @@ std::shared_ptr<Topology> NetworkAnalyticalCongestionUnaware::construct_topology
         // create and return basic topology
         switch (topology_type) {
         case TopologyBuildingBlock::Ring:
-            return std::make_shared<Ring>(npus_count, bandwidth, latency, bidirectional=false);
+            return std::make_shared<Ring>(npus_count, bandwidth, latency, bidirectional=RING_BIDIRECTIONAL);
         case TopologyBuildingBlock::Switch:
             return std::make_shared<Switch>(npus_count, bandwidth, latency);
         case TopologyBuildingBlock::FullyConnected:
