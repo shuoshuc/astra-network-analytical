@@ -37,7 +37,7 @@ std::shared_ptr<Topology> NetworkAnalyticalCongestionAware::construct_topology(
 
     switch (topology_type) {
     case TopologyBuildingBlock::Ring:
-        return std::make_shared<Ring>(npus_count, bandwidth, latency, bidirectional=RING_BIDIRECTIONAL);
+        return std::make_shared<Ring>(npus_count, bandwidth, latency, RING_BIDIRECTIONAL);
     case TopologyBuildingBlock::Switch:
         return std::make_shared<Switch>(npus_count, bandwidth, latency);
     case TopologyBuildingBlock::FullyConnected:
