@@ -41,6 +41,12 @@ file(GLOB srcs_congestion_aware
         ${CMAKE_CURRENT_SOURCE_DIR}/congestion_aware/basic-topology/*.cpp
 )
 
+file (GLOB srcs_reconfigurable
+        ${CMAKE_CURRENT_SOURCE_DIR}/reconfigurable/network/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/reconfigurable/topology/*.cpp
+)
+
+
 # Compile Congestion Unaware Backend
 if (BUILDTARGET STREQUAL "all" OR BUILDTARGET STREQUAL "congestion_unaware")
     if (NETWORK_BACKEND_BUILD_AS_LIBRARY)
@@ -113,4 +119,41 @@ if (BUILDTARGET STREQUAL "all" OR BUILDTARGET STREQUAL "congestion_aware")
     target_include_directories(Analytical_Congestion_Aware PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)
     target_include_directories(Analytical_Congestion_Aware PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/astra-network-analytical/)
     target_include_directories(Analytical_Congestion_Aware PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/extern/)
+endif ()
+
+# Compile Reconfigurable Backend
+if (BUILDTARGET STREQUAL "all" OR BUILDTARGET STREQUAL "reconfigurable")
+    if (NETWORK_BACKEND_BUILD_AS_LIBRARY)
+        add_library(Analytical_Reconfigurable STATIC ${srcs_reconfigurable} ${srcs_common})
+
+        # Properties
+        set_target_properties(Analytical_Reconfigurable
+                PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../bin/
+                LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../lib/
+                ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../lib/
+        )
+    else ()
+        add_executable(Analytical_Reconfigurable ${srcs_reconfigurable} ${srcs_common})
+        target_sources(Analytical_Reconfigurable PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/reconfigurable/example.cpp)
+    
+        # Properties
+        set_target_properties(Analytical_Reconfigurable
+                PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin/
+                LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib/
+                ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib/
+        )
+    endif ()
+
+    # Common properties
+    set_target_properties(Analytical_Reconfigurable PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+
+    # Link libraries
+    target_link_libraries(Analytical_Reconfigurable PUBLIC yaml-cpp)
+
+    # Include directories
+    target_include_directories(Analytical_Reconfigurable PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+    target_include_directories(Analytical_Reconfigurable PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/astra-network-analytical/)
+    target_include_directories(Analytical_Reconfigurable PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/extern/)
 endif ()

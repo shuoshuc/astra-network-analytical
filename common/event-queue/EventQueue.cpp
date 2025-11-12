@@ -5,6 +5,7 @@ LICENSE file in the root directory of this source tree.
 
 #include "common/EventQueue.h"
 #include <cassert>
+#include <stdio.h>
 
 using namespace NetworkAnalytical;
 
@@ -27,17 +28,27 @@ void EventQueue::proceed() noexcept {
     assert(!finished());
 
     // proceed to the next event time
-    auto& current_event_list = event_queue.front();
+    //auto& current_event_list = event_queue.front();
+    // if (!current_event_list.is_empty()) {
+    //     current_event_list.invoke_events();
+    // }
+    
+    EventList current_event_list = event_queue.front();
+    event_queue.pop_front();
 
     // check the validity and update current time
-    assert(current_event_list.get_event_time() > current_time);
+    // if(current_event_list.get_event_time() <= current_time) {
+    //     // this should never happen
+    //     printf("Current time: %lu, Event time: %lu\n", current_time, current_event_list.get_event_time());
+    // }
+    assert(current_event_list.get_event_time() >= current_time);
     current_time = current_event_list.get_event_time();
 
     // invoke events
     current_event_list.invoke_events();
 
     // drop processed event list
-    event_queue.pop_front();
+    
 }
 
 void EventQueue::schedule_event(const EventTime event_time,

@@ -35,6 +35,12 @@ int NetworkParser::get_dims_count() const noexcept {
     return dims_count;
 }
 
+[[nodiscard]] Latency NetworkParser::get_reconfig_time() const noexcept {
+    assert(dims_count > 0);
+
+    return reconfig_time;
+}
+
 std::vector<int> NetworkParser::get_npus_counts_per_dim() const noexcept {
     assert(dims_count > 0);
     assert(npus_count_per_dim.size() == dims_count);
@@ -78,6 +84,14 @@ void NetworkParser::parse_network_config_yml(const YAML::Node& network_config) n
     npus_count_per_dim = parse_vector<int>(network_config["npus_count"]);
     bandwidth_per_dim = parse_vector<Bandwidth>(network_config["bandwidth"]);
     latency_per_dim = parse_vector<Latency>(network_config["latency"]);
+    
+    std::vector<Latency> reconfig_times = parse_vector<Latency>(network_config["reconfig_time"]);
+    if (reconfig_times.size() > 1) {
+        std::cerr << "[Error] (network/analytical) " << "\"reconfig_time\" should be a single value" << std::endl;
+        std::exit(-1);
+    } else if (reconfig_times.size() == 1) {
+        reconfig_time = parse_vector<Latency>(network_config["reconfig_time"])[0];
+    }
 
     // check the validity of the parsed network config
     check_validity();
@@ -96,6 +110,10 @@ TopologyBuildingBlock NetworkParser::parse_topology_name(const std::string& topo
 
     if (topology_name == "Switch") {
         return TopologyBuildingBlock::Switch;
+    }
+
+    if (topology_name == "Reconfig") {
+        return TopologyBuildingBlock::Reconfig;
     }
 
     // shouldn't reach here

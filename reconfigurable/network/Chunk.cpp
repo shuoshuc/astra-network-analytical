@@ -3,13 +3,16 @@ This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 *******************************************************************************/
 
-#include "congestion_aware/Chunk.h"
-#include "congestion_aware/Device.h"
-#include "congestion_aware/Link.h"
+#include "reconfigurable/Chunk.h"
+#include "reconfigurable/Device.h"
+#include "reconfigurable/Link.h"
 #include <cassert>
+#include <optional>
 #include <stdio.h>
 
-using namespace NetworkAnalyticalCongestionAware;
+using namespace NetworkAnalyticalReconfigurable;
+
+int Chunk::on_route_chunks = 0;
 
 void Chunk::chunk_arrived_next_device(void* const chunk_ptr) noexcept {
     assert(chunk_ptr != nullptr);
@@ -23,6 +26,7 @@ void Chunk::chunk_arrived_next_device(void* const chunk_ptr) noexcept {
     if (chunk->arrived_dest()) {
         // chunk arrived dest, invoke callback
         // as chunk is unique_ptr, will be destroyed automatically
+        // printf("ABCDEFGHIJ\n");
         chunk->invoke_callback();
     } else {
         // send this chunk to next dest
@@ -31,13 +35,13 @@ void Chunk::chunk_arrived_next_device(void* const chunk_ptr) noexcept {
     }
 }
 
-Chunk::Chunk(const ChunkSize chunk_size, Route route, const Callback callback, const CallbackArg callback_arg) noexcept
+Chunk::Chunk(const ChunkSize chunk_size, Route route, const Callback callback, const CallbackArg callback_arg, int topology_iteration) noexcept
     : chunk_size(chunk_size),
       route(std::move(route)),
       callback(callback),
-      callback_arg(callback_arg) {
+      callback_arg(callback_arg),
+      topology_iteration(topology_iteration) {
     assert(chunk_size > 0);
-    assert(!this->route.empty());
     assert(callback != nullptr);
 }
 
